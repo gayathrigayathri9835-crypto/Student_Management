@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Marks & Grades - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Marks & Grade Management</h2>
+        <p class="page-subtitle">Record internal assessments and semester examination scores with automated total and grade calculation.</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="openNewMarksModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Record Student Mark</span>
+        </button>
+    </div>
+</div>
+
+<!-- Grade Scheme Callout -->
+<div style="background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 16px 20px; margin-bottom: 24px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;">
+    <div>
+        <strong style="font-size: 13px;">Institutional Grading Scale:</strong>
+        <span style="font-size: 12px; color: var(--text-muted); margin-left: 8px;">Total = Internal (Max 40) + External (Max 60)</span>
+    </div>
+    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+        <span class="badge badge-success">A+ (90–100)</span>
+        <span class="badge badge-success">A (80–89)</span>
+        <span class="badge badge-info">B+ (70–79)</span>
+        <span class="badge badge-info">B (60–69)</span>
+        <span class="badge badge-warning">C (50–59)</span>
+        <span class="badge badge-danger">F (&lt;50)</span>
+    </div>
+</div>
+
+<!-- Marks Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Subject Evaluations ({{ marks_list|length }})</h3>
+        <span class="badge badge-secondary">Dynamic Calculation</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Register Number</th>
+                    <th>Student Name</th>
+                    <th>Dept</th>
+                    <th>Subject</th>
+                    <th>Internal (40)</th>
+                    <th>External (60)</th>
+                    <th>Total (100)</th>
+                    <th>Grade</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if marks_list %}
+                    {% for m in marks_list %}
+                        <tr>
+                            <td><code>{{ m.register_number }}</code></td>
+                            <td><strong>{{ m.student_name }}</strong></td>
+                            <td><span class="badge badge-info">{{ m.department_code }}</span></td>
+                            <td>{{ m.subject }}</td>
+                            <td>{{ m.internal_mark }}</td>
+                            <td>{{ m.external_mark }}</td>
+                            <td><strong>{{ m.total }}</strong></td>
+                            <td>
+                                {% if m.grade in ['A+', 'A'] %}
+                                    <span class="badge badge-success">{{ m.grade }}</span>
+                                {% elif m.grade in ['B+', 'B'] %}
+                                    <span class="badge badge-info">{{ m.grade }}</span>
+                                {% elif m.grade == 'C' %}
+                                    <span class="badge badge-warning">{{ m.grade }}</span>
+                                {% else %}
+                                    <span class="badge badge-danger">{{ m.grade }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="action-buttons" style="justify-content: flex-end;">
+                                    <button type="button" class="icon-btn" title="Edit Mark" onclick="openMarksModal({{ m.student_id }}, '{{ m.student_name|escape }}', '{{ m.subject|escape }}', {{ m.internal_mark }}, {{ m.external_mark }})">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                    <button type="button" class="icon-btn delete" title="Delete Mark Record" onclick="confirmAction('Delete score for {{ m.student_name }} - {{ m.subject }}?', '{{ url_for('delete_mark_action', mark_id=m.id) }}')">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 24px;">No marks recorded yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Marks Modal -->
+<div class="modal-overlay" id="marksModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Record Student Mark</h3>
+            <button type="button" class="modal-close" onclick="closeModal('marksModal')">&times;</button>
+        </div>
+        <form action="{{ url_for('save_mark_action') }}" method="POST">
+            <input type="hidden" name="redirect_url" value="{{ request.path }}">
+            <div class="modal-body">
+                <div class="form-group" id="studentSelectContainer">
+                    <label class="form-label" for="markStudentSelect">Select Student *</label>
+                    <select id="markStudentSelect" name="student_id" class="form-select" required>
+                        <option value="" disabled selected>Choose a student...</option>
+                        {% for st in students %}
+                            <option value="{{ st.id }}">{{ st.name }} ({{ st.register_number }}) - {{ st.department_code }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="markSubject">Subject Name *</label>
+                    <select id="markSubject" name="subject" class="form-select" required>
+                        <option value="Python">Python</option>
+                        <option value="Java">Java</option>
+                        <option value="DBMS">DBMS</option>
+                        <option value="Data Structures">Data Structures</option>
+                        <option value="Computer Networks">Computer Networks</option>
+                        <option value="Mathematics">Mathematics</option>
+                    </select>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="markInternal">Internal Mark (Max 40) *</label>
+                        <input type="number" step="0.5" id="markInternal" name="internal_mark" class="form-control" min="0" max="40" value="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="markExternal">External Mark (Max 60) *</label>
+                        <input type="number" step="0.5" id="markExternal" name="external_mark" class="form-control" min="0" max="60" value="45" required>
+                    </div>
+                </div>
+
+                <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted);">Calculated Total: </span>
+                        <strong id="markTotalDisplay" style="font-size: 15px;">75.0</strong> / 100
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted); margin-right: 6px;">Dynamic Grade: </span>
+                        <span id="markGradeDisplay" class="badge badge-info">B+</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('marksModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Mark</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openNewMarksModal() {
+        document.getElementById("markStudentSelect").value = "";
+        document.getElementById("markSubject").value = "Python";
+        document.getElementById("markInternal").value = "30";
+        document.getElementById("markExternal").value = "45";
+        calculateMarkPreview();
+        openModal("marksModal");
+    }
+</script>
+{% endblock %}

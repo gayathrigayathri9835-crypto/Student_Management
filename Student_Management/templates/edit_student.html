@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Student - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Edit Student Profile</h2>
+        <p class="page-subtitle">Update academic records and contact details for {{ student.name }} ({{ student.register_number }}).</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('student_profile_view', student_id=student.id) }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+            <span>View Profile</span>
+        </a>
+    </div>
+</div>
+
+<!-- Edit Student Form Card -->
+<div class="table-card" style="max-width: 900px; margin: 0 auto 30px;">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Modify Student Information</h3>
+        <span class="badge badge-info">ID: #{{ student.id }}</span>
+    </div>
+
+    <div style="padding: 28px;">
+        <form action="{{ url_for('edit_student_view', student_id=student.id) }}" method="POST">
+            <!-- Readonly Registration No info -->
+            <div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 16px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <span style="font-size: 12px; color: var(--text-muted);">Unique Registration Number</span>
+                    <div style="font-size: 16px; font-weight: 700; color: var(--brand-blue);">{{ student.register_number }}</div>
+                </div>
+                <input type="hidden" name="register_number" value="{{ student.register_number }}">
+                <span class="badge badge-secondary">Locked Identifier</span>
+            </div>
+
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--brand-blue); margin-bottom: 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                1. Personal Information
+            </h4>
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="name">Full Name *</label>
+                    <input type="text" id="name" name="name" class="form-control" value="{{ student.name }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-control" value="{{ student.email }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" value="{{ student.phone }}" pattern="[0-9]{10}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="gender">Gender *</label>
+                    <select id="gender" name="gender" class="form-select" required>
+                        <option value="Male" {% if student.gender == 'Male' %}selected{% endif %}>Male</option>
+                        <option value="Female" {% if student.gender == 'Female' %}selected{% endif %}>Female</option>
+                        <option value="Other" {% if student.gender == 'Other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="dob">Date of Birth *</label>
+                    <input type="date" id="dob" name="dob" class="form-control" value="{{ student.dob }}" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="admission_year">Admission Year *</label>
+                    <input type="number" id="admission_year" name="admission_year" class="form-control" min="2010" max="2030" value="{{ student.admission_year }}" required>
+                </div>
+            </div>
+
+            <h4 style="font-size: 14px; font-weight: 700; color: var(--brand-blue); margin: 24px 0 16px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+                2. Academic Enrollment Details
+            </h4>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label class="form-label" for="department_id">Department *</label>
+                    <select id="department_id" name="department_id" class="form-select" required>
+                        {% for dept in departments %}
+                            <option value="{{ dept.id }}" {% if student.department_id|string == dept.id|string %}selected{% endif %}>
+                                {{ dept.code }} - {{ dept.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="course_id">Course / Degree Program *</label>
+                    <select id="course_id" name="course_id" class="form-select" required>
+                        {% for crs in courses %}
+                            <option value="{{ crs.id }}" {% if student.course_id|string == crs.id|string %}selected{% endif %}>
+                                {{ crs.name }} ({{ crs.duration }})
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="year">Academic Year *</label>
+                    <select id="year" name="year" class="form-select" required>
+                        <option value="1" {% if student.year == 1 %}selected{% endif %}>1st Year</option>
+                        <option value="2" {% if student.year == 2 %}selected{% endif %}>2nd Year</option>
+                        <option value="3" {% if student.year == 3 %}selected{% endif %}>3rd Year</option>
+                        <option value="4" {% if student.year == 4 %}selected{% endif %}>4th Year</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="section">Section *</label>
+                    <input type="text" id="section" name="section" class="form-control" value="{{ student.section }}" maxlength="2" required>
+                </div>
+            </div>
+
+            <div class="form-group" style="margin-top: 10px;">
+                <label class="form-label" for="address">Permanent Residential Address *</label>
+                <textarea id="address" name="address" class="form-control" required>{{ student.address }}</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 24px;">
+                <a href="{{ url_for('students_list') }}" class="btn btn-secondary">Cancel</a>
+                <button type="submit" class="btn btn-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+                    <span>Save Changes</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

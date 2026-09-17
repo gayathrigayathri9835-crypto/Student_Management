@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block title %}Academic Reports - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Presentation Print Header (Only visible in Print / PDF export) -->
+<div class="print-header">
+    <h1 style="font-size: 20pt; margin-bottom: 4px;">COLLEGE OF ENGINEERING & TECHNOLOGY</h1>
+    <h2 style="font-size: 14pt; color: #475569; font-weight: normal; margin-bottom: 8px;">Department of Academic Affairs & Evaluation</h2>
+    <h3 style="font-size: 13pt; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Student Academic Performance & Attendance Report</h3>
+    <div style="font-size: 9pt; color: #64748b;">
+        <span>Generated On: <span id="printTimestamp">September 2024</span></span> • 
+        <span>System: Flask-SQLite Student Management Prototype</span>
+    </div>
+</div>
+
+<!-- Screen Page Header -->
+<div class="page-header no-print">
+    <div>
+        <h2 class="page-title">Academic Reports & Summaries</h2>
+        <p class="page-subtitle">Consolidated institutional audit sheets optimized for college evaluation committees and faculty presentations.</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="window.print()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+            <span>Print / Save PDF Report</span>
+        </button>
+    </div>
+</div>
+
+<!-- KPI Summary Highlights -->
+<div class="metrics-grid">
+    <div class="stat-card">
+        <div class="stat-title">Total Enrolled</div>
+        <div class="stat-value" style="font-size: 24px;">{{ data.total_students }}</div>
+        <div class="stat-subtext">Students Registered</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Departments</div>
+        <div class="stat-value" style="font-size: 24px;">{{ data.total_departments }}</div>
+        <div class="stat-subtext">Faculty Units</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Average Attendance</div>
+        <div class="stat-value" style="font-size: 24px;">{{ data.average_attendance }}%</div>
+        <div class="stat-subtext">Compliance Average</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Academic Average</div>
+        <div class="stat-value" style="font-size: 24px;">{{ perf.average_mark }}%</div>
+        <div class="stat-subtext">Mean Score</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Pass Rate</div>
+        <div class="stat-value" style="font-size: 24px;">
+            {% if perf.total_evaluations > 0 %}
+                {{ ((perf.passed_count / perf.total_evaluations) * 100)|round(1) }}%
+            {% else %}
+                0%
+            {% endif %}
+        </div>
+        <div class="stat-subtext">{{ perf.passed_count }} passed / {{ perf.total_evaluations }} evaluations</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-title">Attention Flagged</div>
+        <div class="stat-value" style="font-size: 24px; color: var(--danger);">{{ data.students_needing_attention }}</div>
+        <div class="stat-subtext">{{ data.at_risk_students }} critical risk</div>
+    </div>
+</div>
+
+<!-- Section 1: Department Summary Table -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">1. Departmental Enrollment & Faculty Leadership</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Dept Code</th>
+                    <th>Department Name</th>
+                    <th>Head of Department (HOD)</th>
+                    <th>Student Intake</th>
+                    <th>Percentage Share</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dept in departments %}
+                    <tr>
+                        <td><strong><code>{{ dept.code }}</code></strong></td>
+                        <td>{{ dept.name }}</td>
+                        <td>{{ dept.hod }}</td>
+                        <td><strong>{{ dept.student_count }}</strong></td>
+                        <td>
+                            {% if data.total_students > 0 %}
+                                {{ ((dept.student_count / data.total_students) * 100)|round(1) }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Section 2: Subject Performance Summary Table -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">2. Curriculum Subject Performance Summary</h3>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Subject Title</th>
+                    <th>Average Mark</th>
+                    <th>Highest Mark</th>
+                    <th>Lowest Mark</th>
+                    <th>Performance Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for sub in perf.subject_analysis %}
+                    <tr>
+                        <td><strong>{{ sub.subject }}</strong></td>
+                        <td>{{ sub.avg_score }}%</td>
+                        <td style="color: var(--success); font-weight: 600;">{{ sub.max_score }}</td>
+                        <td style="color: var(--danger); font-weight: 600;">{{ sub.min_score }}</td>
+                        <td>
+                            {% if sub.avg_score >= 75 %}
+                                <span class="badge badge-success">High Distinction</span>
+                            {% elif sub.avg_score >= 60 %}
+                                <span class="badge badge-info">Satisfactory</span>
+                            {% else %}
+                                <span class="badge badge-warning">Improvement Needed</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Section 3: Students Needing Academic Support (Low Attendance or Low Marks) -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">3. Student Standing Audit (Flagged for Academic Support)</h3>
+        <span class="badge badge-warning">Priority Action Roster</span>
+    </div>
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Register Number</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Attendance %</th>
+                    <th>Average Mark</th>
+                    <th>Failed Subjects</th>
+                    <th>Standing</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set flagged = [] %}
+                {% for st in students %}
+                    {% if st.status in ['Needs Attention', 'At Risk'] %}
+                        <tr>
+                            <td><code>{{ st.register_number }}</code></td>
+                            <td><strong>{{ st.name }}</strong></td>
+                            <td><span class="badge badge-info">{{ st.department_code }}</span></td>
+                            <td style="font-weight: 600; color: {% if st.attendance_percentage < 60 %}var(--danger){% else %}var(--warning){% endif %};">
+                                {{ st.attendance_percentage }}%
+                            </td>
+                            <td>{{ st.average_mark }}%</td>
+                            <td>
+                                {% if st.failed_subjects > 0 %}
+                                    <span class="badge badge-danger">{{ st.failed_subjects }} subject(s)</span>
+                                {% else %}
+                                    <span class="badge badge-secondary">0</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if st.status == 'At Risk' %}
+                                    <span class="badge badge-danger">At Risk</span>
+                                {% else %}
+                                    <span class="badge badge-warning">Needs Attention</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Print Signatures Section (Visible on Print) -->
+<div class="print-signatures" style="display: none; margin-top: 40px; padding-top: 20px; border-top: 1px solid #ccc; justify-content: space-between;">
+    <div style="text-align: center;">
+        <div style="width: 180px; border-top: 1px solid #000; margin-bottom: 6px;"></div>
+        <span>Faculty Coordinator</span>
+    </div>
+    <div style="text-align: center;">
+        <div style="width: 180px; border-top: 1px solid #000; margin-bottom: 6px;"></div>
+        <span>Head of Department</span>
+    </div>
+    <div style="text-align: center;">
+        <div style="width: 180px; border-top: 1px solid #000; margin-bottom: 6px;"></div>
+        <span>Dean of Academics</span>
+    </div>
+</div>
+
+<style>
+@media print {
+    .print-signatures {
+        display: flex !important;
+    }
+}
+</style>
+{% endblock %}

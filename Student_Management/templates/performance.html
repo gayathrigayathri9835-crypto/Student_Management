@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Performance Analytics - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Institutional Academic Analytics</h2>
+        <p class="page-subtitle">Comprehensive performance breakdown across departments, curriculum subjects, and grading distributions.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('reports_view') }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+            <span>Generate Official Report</span>
+        </a>
+    </div>
+</div>
+
+<!-- Performance KPI Stat Cards Grid -->
+<div class="metrics-grid">
+    <!-- Overall Average Mark -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Average Mark</span>
+            <div class="stat-icon blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.average_mark }}%</div>
+        <div class="stat-subtext">Across all enrolled subjects</div>
+    </div>
+
+    <!-- Highest Mark -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Highest Score</span>
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline><polyline points="16 7 22 7 22 13"></polyline></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.highest_mark }}</div>
+        <div class="stat-subtext">Peak performance mark</div>
+    </div>
+
+    <!-- Lowest Mark -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Lowest Score</span>
+            <div class="stat-icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"></polyline><polyline points="16 17 22 17 22 11"></polyline></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.lowest_mark }}</div>
+        <div class="stat-subtext">Requires targeted coaching</div>
+    </div>
+
+    <!-- Total Evaluations -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Total Tests Evaluated</span>
+            <div class="stat-icon purple">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.total_evaluations }}</div>
+        <div class="stat-subtext">Graded course records</div>
+    </div>
+
+    <!-- Passed Subjects -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Pass Count</span>
+            <div class="stat-icon green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.passed_count }}</div>
+        <div class="stat-subtext">Scores ≥ 50%</div>
+    </div>
+
+    <!-- Failed Subjects -->
+    <div class="stat-card">
+        <div class="stat-card-header">
+            <span class="stat-title">Arrears / Failures</span>
+            <div class="stat-icon red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </div>
+        </div>
+        <div class="stat-value">{{ data.failed_count }}</div>
+        <div class="stat-subtext">Grade F (&lt;50%)</div>
+    </div>
+</div>
+
+<!-- 4 Chart.js Visualizations Grid -->
+<div class="charts-grid">
+    <!-- 1. Subject-wise Marks (Bar) -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Subject-Wise Marks Analysis (Avg vs Peak)</h3>
+            <span class="badge badge-info">Course Curricula</span>
+        </div>
+        <div class="chart-canvas-container">
+            <canvas id="subjectMarksChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 2. Grade Distribution (Bar) -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Overall Grade Distribution</h3>
+            <span class="badge badge-secondary">A+ to F</span>
+        </div>
+        <div class="chart-canvas-container">
+            <canvas id="gradeDistributionChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 3. Department Enrollment (Doughnut) -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Department Distribution</h3>
+            <span class="badge badge-secondary">Headcount Share</span>
+        </div>
+        <div class="chart-canvas-container">
+            <canvas id="deptPerfChart"></canvas>
+        </div>
+    </div>
+
+    <!-- 4. Attendance Distribution (Pie) -->
+    <div class="chart-card">
+        <div class="chart-header">
+            <h3 class="chart-title">Institutional Attendance Tiers</h3>
+            <span class="badge badge-secondary">Compliance Standing</span>
+        </div>
+        <div class="chart-canvas-container">
+            <canvas id="attPerfChart"></canvas>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const perfData = {{ data | tojson }};
+    renderPerformanceCharts(perfData);
+</script>
+{% endblock %}

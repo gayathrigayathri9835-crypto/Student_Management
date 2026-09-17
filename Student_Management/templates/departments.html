@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Department Management - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Department Management</h2>
+        <p class="page-subtitle">Oversee academic departments, department codes, faculty leadership (HODs), and student intake.</p>
+    </div>
+    <div class="header-actions">
+        <button type="button" class="btn btn-primary" onclick="openAddDeptModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Add Department</span>
+        </button>
+    </div>
+</div>
+
+<!-- Department Cards Grid -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Active Academic Departments ({{ departments|length }})</h3>
+        <span class="badge badge-secondary">Faculty Divisions</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Department Code</th>
+                    <th>Department Name</th>
+                    <th>Head of Department (HOD)</th>
+                    <th>Enrolled Students</th>
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if departments %}
+                    {% for d in departments %}
+                        <tr>
+                            <td><strong><code>{{ d.code }}</code></strong></td>
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.hod }}</td>
+                            <td>
+                                <span class="badge badge-info">{{ d.student_count }} Students</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <div class="action-buttons" style="justify-content: flex-end;">
+                                    <button type="button" class="icon-btn" title="Edit Department" onclick="openEditDeptModal({{ d.id }}, '{{ d.name|escape }}', '{{ d.code|escape }}', '{{ d.hod|escape }}')">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                                    </button>
+                                    <button type="button" class="icon-btn delete" title="Delete Department" onclick="confirmAction('Are you sure you want to delete department {{ d.name }}?', '{{ url_for('delete_department_action', dept_id=d.id) }}')">
+                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">No departments found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Add/Edit Department Modal -->
+<div class="modal-overlay" id="deptModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="deptModalTitle">Add Academic Department</h3>
+            <button type="button" class="modal-close" onclick="closeModal('deptModal')">&times;</button>
+        </div>
+        <form id="deptForm" method="POST" action="{{ url_for('add_department_action') }}">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label" for="deptName">Department Name *</label>
+                    <input type="text" id="deptName" name="name" class="form-control" placeholder="e.g. Computer Science and Engineering" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="deptCode">Department Code *</label>
+                    <input type="text" id="deptCode" name="code" class="form-control" placeholder="e.g. CSE" style="text-transform: uppercase;" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="deptHod">Head of Department (HOD) *</label>
+                    <input type="text" id="deptHod" name="hod" class="form-control" placeholder="e.g. Dr. Rajesh Sharma" required>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('deptModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function openAddDeptModal() {
+        document.getElementById("deptModalTitle").innerText = "Add Academic Department";
+        document.getElementById("deptForm").action = "{{ url_for('add_department_action') }}";
+        document.getElementById("deptName").value = "";
+        document.getElementById("deptCode").value = "";
+        document.getElementById("deptHod").value = "";
+        openModal("deptModal");
+    }
+
+    function openEditDeptModal(id, name, code, hod) {
+        document.getElementById("deptModalTitle").innerText = "Edit Academic Department";
+        document.getElementById("deptForm").action = `/departments/edit/${id}`;
+        document.getElementById("deptName").value = name;
+        document.getElementById("deptCode").value = code;
+        document.getElementById("deptHod").value = hod;
+        openModal("deptModal");
+    }
+</script>
+{% endblock %}

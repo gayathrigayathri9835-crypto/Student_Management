@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Management - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Attendance Tracking & Management</h2>
+        <p class="page-subtitle">Monitor class attendance compliance, track present/absent counts, and identify shortage warnings.</p>
+    </div>
+    <div class="header-actions">
+        <span class="badge badge-success">Good: ≥75%</span>
+        <span class="badge badge-warning">Warning: 60–74%</span>
+        <span class="badge badge-danger">Critical: &lt;60%</span>
+    </div>
+</div>
+
+<!-- Attendance Data Table Card -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Student Attendance Register ({{ attendance_list|length }})</h3>
+        <span class="badge badge-secondary">Real-time Calculation</span>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Register Number</th>
+                    <th>Student Name</th>
+                    <th>Department</th>
+                    <th>Total Classes</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                    <th>Attendance %</th>
+                    <th>Standing</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if attendance_list %}
+                    {% for att in attendance_list %}
+                        <tr>
+                            <td><code>{{ att.register_number }}</code></td>
+                            <td>
+                                <strong>{{ att.student_name }}</strong>
+                                <div style="font-size: 11px; color: var(--text-muted);">Year {{ att.year }} • Sec {{ att.section }}</div>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ att.department_code }}</span>
+                            </td>
+                            <td>{{ att.total_classes }}</td>
+                            <td style="color: var(--success); font-weight: 600;">{{ att.present }}</td>
+                            <td style="color: var(--danger); font-weight: 600;">{{ att.absent }}</td>
+                            <td style="min-width: 150px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 2px;">
+                                    <strong>{{ att.percentage }}%</strong>
+                                </div>
+                                <div class="progress-bar-container">
+                                    <div class="progress-bar-fill {% if att.percentage >= 75 %}fill-success{% elif att.percentage >= 60 %}fill-warning{% else %}fill-danger{% endif %}" 
+                                         style="width: {{ att.percentage }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {{ att.badge_class }}">
+                                    {{ att.attendance_status }}
+                                </span>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="btn btn-secondary btn-sm" onclick="openAttendanceModal({{ att.student_id }}, '{{ att.student_name|escape }}', {{ att.total_classes }}, {{ att.present }})">
+                                    Update
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="9" style="text-align: center; color: var(--text-muted); padding: 24px;">No attendance records found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Attendance Update Modal -->
+<div class="modal-overlay" id="attendanceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Attendance Record</h3>
+            <button type="button" class="modal-close" onclick="closeModal('attendanceModal')">&times;</button>
+        </div>
+        <form id="attendanceForm" method="POST">
+            <div class="modal-body">
+                <p style="margin-bottom: 14px; font-size: 13px;">Updating attendance for: <strong id="attStudentName"></strong></p>
+                
+                <div class="form-group">
+                    <label class="form-label" for="attTotalClasses">Total Classes Conducted *</label>
+                    <input type="number" id="attTotalClasses" name="total_classes" class="form-control" min="1" required oninput="calcAttendancePreview()">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="attPresentClasses">Classes Attended (Present) *</label>
+                    <input type="number" id="attPresentClasses" name="present" class="form-control" min="0" required oninput="calcAttendancePreview()">
+                </div>
+
+                <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 13px; color: var(--text-secondary);">Calculated Standing:</span>
+                    <span id="attPercentagePreview" class="badge badge-secondary">0%</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('attendanceModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

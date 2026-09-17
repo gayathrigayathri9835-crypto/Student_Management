@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}About Project - Student Management System{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">About the Project</h2>
+        <p class="page-subtitle">Educational mini-project specifications, technology stack, architecture, and future roadmap.</p>
+    </div>
+</div>
+
+<!-- Project Overview Card -->
+<div class="table-card" style="margin-bottom: 24px;">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Project Overview & Academic Purpose</h3>
+        <span class="badge badge-info">College Mini Project Prototype</span>
+    </div>
+    <div style="padding: 24px; font-size: 13px; line-height: 1.7; color: var(--text-secondary);">
+        <p style="margin-bottom: 14px;">
+            The <strong>Student Management System (SMS)</strong> is a lightweight, responsive web-based academic administration platform. Developed specifically for college and university departments, it digitalizes student record keeping, class attendance monitoring, examination marks calculation, and academic standing classification.
+        </p>
+        <p>
+            The system employs a clean, modular Python Flask backend with an integrated SQLite database engine. All calculations—including percentage thresholds, letter grades (A+ through F), and risk indicators—are computed dynamically rather than hardcoded.
+        </p>
+    </div>
+</div>
+
+<!-- Architecture & Tech Stack Grid -->
+<div class="charts-grid" style="margin-bottom: 24px;">
+    <div class="chart-card">
+        <h3 class="chart-title" style="margin-bottom: 14px;">Technologies & Frameworks</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <strong>Backend Framework:</strong> <span>Python Flask 3.x</span>
+            </li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <strong>Database Engine:</strong> <span>SQLite 3 (Embedded Native)</span>
+            </li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <strong>Frontend Markup:</strong> <span>HTML5 Semantic Elements</span>
+            </li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <strong>Styling System:</strong> <span>Vanilla CSS3 (Bespoke Design Tokens)</span>
+            </li>
+            <li style="padding: 8px 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+                <strong>Client-side Scripting:</strong> <span>Vanilla JavaScript (ES6+)</span>
+            </li>
+            <li style="padding: 8px 0; display: flex; justify-content: space-between;">
+                <strong>Data Visualizations:</strong> <span>Chart.js 4.x via CDN</span>
+            </li>
+        </ul>
+    </div>
+
+    <div class="chart-card">
+        <h3 class="chart-title" style="margin-bottom: 14px;">Core Modules Implemented</h3>
+        <ul style="padding-left: 20px; color: var(--text-secondary); line-height: 1.8;">
+            <li><strong>Dashboard:</strong> Real-time KPIs, enrollment distribution, active notifications.</li>
+            <li><strong>Student Directory:</strong> Complete records, live search, multi-field filtering.</li>
+            <li><strong>Full CRUD:</strong> Add, edit, delete, view profiles with validation.</li>
+            <li><strong>Course & Dept Management:</strong> Relational foreign key bindings.</li>
+            <li><strong>Attendance Tracking:</strong> Automated absent calculation and progress indicators.</li>
+            <li><strong>Marks & Grading:</strong> Internal/external score summation with letter grades.</li>
+            <li><strong>Academic Standing:</strong> Status classified into Excellent, Good, Needs Attention, At Risk.</li>
+            <li><strong>Institutional Reports:</strong> Formatted printable dossiers with signature blocks.</li>
+        </ul>
+    </div>
+</div>
+
+<!-- Project Limitations Warning Banner -->
+<div style="background: #fffbeb; border: 1px solid #fde68a; border-left: 6px solid var(--warning); border-radius: var(--radius-md); padding: 20px; margin-bottom: 24px;">
+    <h4 style="color: #92400e; font-size: 15px; font-weight: 700; margin-bottom: 6px;">Project Limitation Notice</h4>
+    <p style="color: #78350f; font-size: 13px; line-height: 1.6;">
+        “This project is a college-level prototype designed for educational purposes. It demonstrates student information management, attendance tracking, marks management, and basic academic analysis. It is not intended to replace official college ERP or academic management systems.”
+    </p>
+</div>
+
+<!-- Future Roadmap & Enhancements -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Future Planned Enhancements</h3>
+        <span class="badge badge-primary">Version 2.0 Roadmap</span>
+    </div>
+    <div style="padding: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px;">
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>Role-Based Access</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Admin, faculty, and student portals with secure authentication.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>Notifications Engine</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Automated email and SMS alerts for attendance shortages and results.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>Fee Management</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Tuition tracking, online receipts, and payment gateway integration.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>ID Card & Certificates</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Automated PDF generation of student ID cards and bonafide certificates.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>Timetable Scheduling</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">Classroom allocation, period scheduling, and faculty assignments.</p>
+            </div>
+            <div style="background: #f8fafc; padding: 12px 16px; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                <strong>Cloud Deployment</strong>
+                <p style="font-size: 12px; color: var(--text-muted); margin-top: 4px;">PostgreSQL cloud database hosting and mobile responsive PWA.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

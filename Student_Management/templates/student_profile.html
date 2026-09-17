@@ -1,0 +1,276 @@
+{% extends "base.html" %}
+
+{% block title %}Student Profile - {{ student.name }}{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div>
+        <h2 class="page-title">Student Academic Profile</h2>
+        <p class="page-subtitle">Comprehensive dossier of personal details, attendance records, subject scores, and standing.</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('students_list') }}" class="btn btn-secondary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>Back to Students</span>
+        </a>
+        <a href="{{ url_for('edit_student_view', student_id=student.id) }}" class="btn btn-primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+            <span>Edit Information</span>
+        </a>
+    </div>
+</div>
+
+<!-- Profile Card Header -->
+<div class="profile-card">
+    <div class="profile-banner"></div>
+    <div class="profile-header-content">
+        <div class="profile-avatar-box">
+            <div class="profile-avatar">
+                {{ student.name[:2]|upper }}
+            </div>
+            <div class="profile-name-area">
+                <h2>{{ student.name }}</h2>
+                <p><code>{{ student.register_number }}</code> • {{ student.department_name }} ({{ student.department_code }})</p>
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            {% if student.status == 'Excellent' %}
+                <span class="badge badge-success" style="font-size: 13px; padding: 6px 14px;">Status: Excellent</span>
+            {% elif student.status == 'Good' %}
+                <span class="badge badge-info" style="font-size: 13px; padding: 6px 14px;">Status: Good</span>
+            {% elif student.status == 'Needs Attention' %}
+                <span class="badge badge-warning" style="font-size: 13px; padding: 6px 14px;">Status: Needs Attention</span>
+            {% else %}
+                <span class="badge badge-danger" style="font-size: 13px; padding: 6px 14px;">Status: At Risk</span>
+            {% endif %}
+
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openAttendanceModal({{ student.id }}, '{{ student.name|escape }}', {{ student.total_classes }}, {{ student.present_classes }})">
+                Update Attendance
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="openMarksModal({{ student.id }}, '{{ student.name|escape }}')">
+                + Add Marks
+            </button>
+        </div>
+    </div>
+
+    <!-- Personal & Academic Information Grid -->
+    <div class="profile-grid">
+        <!-- Personal Information -->
+        <div class="info-card">
+            <div class="info-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                <span>Personal Information</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Full Name</span>
+                <span class="info-value">{{ student.name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Gender</span>
+                <span class="info-value">{{ student.gender }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Date of Birth</span>
+                <span class="info-value">{{ student.dob }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Email Address</span>
+                <span class="info-value">{{ student.email }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Contact Phone</span>
+                <span class="info-value">{{ student.phone }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Address</span>
+                <span class="info-value" style="max-width: 250px;">{{ student.address }}</span>
+            </div>
+        </div>
+
+        <!-- Academic & Evaluation Standing -->
+        <div class="info-card">
+            <div class="info-card-title">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
+                <span>Academic Standing</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Department</span>
+                <span class="info-value">{{ student.department_name }} ({{ student.department_code }})</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Degree Course</span>
+                <span class="info-value">{{ student.course_name }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Current Term</span>
+                <span class="info-value">Year {{ student.year }} • Section {{ student.section }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Admission Year</span>
+                <span class="info-value">{{ student.admission_year }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Attendance Record</span>
+                <span class="info-value">
+                    <strong>{{ student.attendance_percentage }}%</strong> ({{ student.present_classes }}/{{ student.total_classes }} classes)
+                </span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Average Mark / Grade</span>
+                <span class="info-value">
+                    <strong>{{ student.average_mark }} / 100</strong> (Grade: <span class="badge {% if student.overall_grade in ['A+', 'A'] %}badge-success{% elif student.overall_grade in ['B+', 'B'] %}badge-info{% elif student.overall_grade == 'C' %}badge-warning{% else %}badge-danger{% endif %}">{{ student.overall_grade }}</span>)
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Academic Marks and Subject Evaluations -->
+<div class="table-card">
+    <div class="table-card-header">
+        <h3 class="table-card-title">Subject Evaluations & Marks ({{ marks|length }})</h3>
+        <button type="button" class="btn btn-primary btn-sm" onclick="openMarksModal({{ student.id }}, '{{ student.name|escape }}')">
+            + Record Subject Mark
+        </button>
+    </div>
+
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Subject</th>
+                    <th>Internal Mark (Max 40)</th>
+                    <th>External Mark (Max 60)</th>
+                    <th>Total Mark (100)</th>
+                    <th>Grade</th>
+                    <th style="text-align: right;">Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if marks %}
+                    {% for m in marks %}
+                        <tr>
+                            <td><strong>{{ m.subject }}</strong></td>
+                            <td>{{ m.internal_mark }}</td>
+                            <td>{{ m.external_mark }}</td>
+                            <td><strong>{{ m.total }}</strong></td>
+                            <td>
+                                {% if m.grade in ['A+', 'A'] %}
+                                    <span class="badge badge-success">{{ m.grade }}</span>
+                                {% elif m.grade in ['B+', 'B'] %}
+                                    <span class="badge badge-info">{{ m.grade }}</span>
+                                {% elif m.grade == 'C' %}
+                                    <span class="badge badge-warning">{{ m.grade }}</span>
+                                {% else %}
+                                    <span class="badge badge-danger">{{ m.grade }}</span>
+                                {% endif %}
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="icon-btn delete" title="Delete Mark Record" onclick="confirmAction('Delete mark record for {{ m.subject }}?', '{{ url_for('delete_mark_action', mark_id=m.id) }}')">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: var(--text-muted); padding: 24px;">
+                            No subject marks recorded yet. Click "Record Subject Mark" to add grades.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Evaluation Disclaimer Note -->
+<div style="background: #f8fafc; border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 12px 18px; font-size: 12px; color: var(--text-muted); margin-bottom: 24px;">
+    <strong>Academic Evaluation Disclaimer:</strong> The status indicators (Excellent, Good, Needs Attention, At Risk) are automated algorithmic calculations designed for academic progress monitoring and educational demonstrations. They do not constitute official college disciplinary or administrative rulings.
+</div>
+
+<!-- Attendance Update Modal -->
+<div class="modal-overlay" id="attendanceModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Update Attendance Record</h3>
+            <button type="button" class="modal-close" onclick="closeModal('attendanceModal')">&times;</button>
+        </div>
+        <form id="attendanceForm" method="POST">
+            <div class="modal-body">
+                <p style="margin-bottom: 14px; font-size: 13px;">Updating attendance for: <strong id="attStudentName"></strong></p>
+                <div class="form-group">
+                    <label class="form-label" for="attTotalClasses">Total Classes Held *</label>
+                    <input type="number" id="attTotalClasses" name="total_classes" class="form-control" min="1" required oninput="calcAttendancePreview()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="attPresentClasses">Classes Attended (Present) *</label>
+                    <input type="number" id="attPresentClasses" name="present" class="form-control" min="0" required oninput="calcAttendancePreview()">
+                </div>
+                <div style="margin-top: 10px; font-size: 13px;">
+                    <span>Calculated Attendance: </span>
+                    <span id="attPercentagePreview" class="badge badge-secondary">0%</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('attendanceModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Attendance</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Marks Entry Modal -->
+<div class="modal-overlay" id="marksModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Record Subject Marks</h3>
+            <button type="button" class="modal-close" onclick="closeModal('marksModal')">&times;</button>
+        </div>
+        <form action="{{ url_for('save_mark_action') }}" method="POST">
+            <input type="hidden" name="student_id" id="markStudentSelect" value="{{ student.id }}">
+            <input type="hidden" name="redirect_url" value="{{ request.path }}">
+            <div class="modal-body">
+                <p style="margin-bottom: 14px; font-size: 13px;">Student: <strong id="markStudentNameDisplay">{{ student.name }}</strong></p>
+                <div class="form-group">
+                    <label class="form-label" for="markSubject">Subject Name *</label>
+                    <select id="markSubject" name="subject" class="form-select" required>
+                        <option value="Python">Python Programming</option>
+                        <option value="Java">Java Development</option>
+                        <option value="DBMS">Database Management Systems</option>
+                        <option value="Data Structures">Data Structures & Algorithms</option>
+                        <option value="Computer Networks">Computer Networks</option>
+                        <option value="Mathematics">Engineering Mathematics</option>
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="form-label" for="markInternal">Internal Mark (Max 40) *</label>
+                        <input type="number" step="0.5" id="markInternal" name="internal_mark" class="form-control" min="0" max="40" value="30" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="markExternal">External Mark (Max 60) *</label>
+                        <input type="number" step="0.5" id="markExternal" name="external_mark" class="form-control" min="0" max="60" value="45" required>
+                    </div>
+                </div>
+                <div style="background: #f8fafc; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted);">Total Mark: </span>
+                        <strong id="markTotalDisplay" style="font-size: 15px;">75.0</strong> / 100
+                    </div>
+                    <div>
+                        <span style="font-size: 12px; color: var(--text-muted); margin-right: 6px;">Grade: </span>
+                        <span id="markGradeDisplay" class="badge badge-info">B+</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="closeModal('marksModal')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Mark Record</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
